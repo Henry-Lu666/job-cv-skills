@@ -1,119 +1,106 @@
-# 求职全链路自动化 · Skills 套件
+# 求职全链路自动化 · Skills 套件 v2.0
 
 一条流水线跑完求职全流程：从扫邮箱到模拟面试。
 
-## 包含的 Skills
+## 架构总览
 
-| Skill | 功能 | 单独可用 |
-|-------|------|---------|
-| `job-cv-apply` | 6阶段求职管线：调研→SMART→PPT→模拟→修正→投递追踪 | ✅ |
-| `interview-simulation` | 多轮深度面试模拟：五步循环+STAR反馈+七轮递进 | ✅ |
-| `personality-receipt` | 人格小票：上传聊天记录生成AI专属使用说明书 | ✅ |
+### 6大技能模块
 
-三个 skill 可独立使用，也可组合使用。`job-cv-apply` 的 Stage 6F 会自动调用其余两个。
+| Skill | 定位 | 大小 | 功能 |
+|-------|------|------|------|
+| `job-core` | 📌 基准 | 核心规则 | 红线铁律、甜蜜区定位、双视角决策框架 |
+| `job-pipeline` | 🔄 管线 | 流程骨架 | Stage 0-5全流程定义、平台限制清单、关键教训 |
+| `job-cdp` | 📡 监控 | 自动化扫描 | Gmail+CDP多平台通知监控、OAuth管理 |
+| `job-interview` | 🎯 面试 | 面试准备 | SMART痛点逆向工程、STAR故事、薪资谈判、PPT生成、咖啡会面策略 |
+| `jd-inspector` | 🛠 工具 | JD审查 | 门槛审查、坑点扫描、9维度评分 |
+| `interview-simulation` | 🎭 模拟 | 面试模拟 | 五步循环+STAR反馈+七轮递进+四种面试官类型 |
 
-## 安装
+> 旧版 `job-cv-apply` 单体skill（v1.0）已拆分为以上6个正交模块。每个可独立使用，也可组合成完整求职流水线。
 
-```bash
-# 方法一：通过 npx 安装（推荐）
-npx skills add your-username/job-cv-apply
-npx skills add your-username/interview-simulation
-npx skills add your-username/personality-receipt
+### 其他模块
 
-# 方法二：手动复制
-# 将 skills/ 下的对应目录复制到 ~/.hermes/skills/productivity/
-```
+| Skill | 功能 |
+|-------|------|
+| `personality-receipt` | 人格小票—上传聊天记录生成AI专属使用说明书 |
 
-## 前置准备（首次使用前必做）
-
-### 1. Gmail 授权
-```
-参考 skills/job-cv-apply/references/gmail-mcp-setup.md
-→ 在 Google Cloud Console 创建项目
-→ 启用 Gmail API
-→ 配置 OAuth 2.0 凭据
-→ 首次运行自动触发授权
-```
-
-### 2. Chrome CDP 启动
-```
-参考 skills/job-cv-apply/references/chrome-cdp-setup-guide.md
-→ 创建专用 Chrome 配置文件
-→ 以 --remote-debugging-port=9222 启动
-→ 登录求职站点，保存密码
-→ 后续 CDP 自动使用已保存的会话
-```
-
-### 3. 配置路径
-
-在 `~/.hermes/config.yaml` 或 skill 的 `SKILL.md` 中替换占位符：
-
-```yaml
-resume_path: "your-resume-path/your-resume.docx"
-knowledge_base: "your-kb-path/"
-chrome_user_data: "your-chrome-user-data-path/"
-chrome_debug_port: 9222
-gmail_credentials: "~/.gmail-mcp/credentials.json"
-```
+---
 
 ## 快速开始
 
-安装 + 配置完成后，说一句话就能启动：
-
-| 你说 | 发生什么 |
-|------|---------|
-| "扫邮箱" | Gmail 扫描 → 列出新岗位通知 |
-| "准备面试 XX公司" | 调研→SMART方案→PPT→模拟 全流程 |
-| "模拟面试" | 加载 interview-simulation skill，直接进入角色扮演 |
-| "人格小票" | 从你的自我介绍生成一页热敏小票风格的性格画像 |
-| "走一遍" | 完整求职日常：扫邮箱→看岗位→投递→追踪 |
-
-## 依赖关系
-
-```
-job-cv-apply
-├── deep-research skill    （Stage 6A：公司调研）
-├── interview-simulation   （Stage 6F：面试模拟）
-│   └── personality-receipt（模拟时适配用户沟通模式）
-└── 工具链
-    ├── Gmail MCP          （邮件扫描）
-    ├── Chrome CDP          （浏览器自动化）
-    └── python-docx         （简历生成）
+```bash
+# 将对应skill目录复制到Hermes skills目录
+cp -r skills/job-core ~/.hermes/skills/productivity/
+cp -r skills/job-pipeline ~/.hermes/skills/productivity/
+cp -r skills/job-cdp ~/.hermes/skills/productivity/
+cp -r skills/job-interview ~/.hermes/skills/productivity/
+cp -r skills/jd-inspector ~/.hermes/skills/productivity/
+cp -r skills/interview-simulation ~/.hermes/skills/productivity/
 ```
 
-## 文件结构
+---
+
+## 前置准备
+
+### 1. Gmail授权
+在 Google Cloud Console 创建项目 → 启用 Gmail API → 配置 OAuth 2.0 凭据 → 配置 Gmail MCP。
+
+### 2. Chrome CDP设置
+- 创建专用 Chrome 配置文件
+- 以 `--remote-debugging-port=9222` 启动
+- 登录求职站点，保存密码到书签文件夹
+- 配置 `browser.cdp_url` 为 `http://localhost:9222`
+
+### 3. 简历与知识库路径
+在Hermes配置中设置你的简历路径：
+```yaml
+resume_path: "your-resume-path/your-resume.docx"
+resume_v4_path: "your-resume-path/your-resume-v4.docx"
+knowledge_base: "your-kb-path/"
+chrome_debug_port: 9222
+```
+
+---
+
+## 工作流程
+
+### 日常巡检（"走一遍"）
 
 ```
-skills/job-cv-apply/
-├── SKILL.md                    ← 主文件（脱敏版）
-├── references/                 ← 方法论参考（66个文件）
-│   ├── gmail-mcp-setup.md      ← Gmail 授权指南
-│   ├── chrome-cdp-setup-guide.md ← CDP 设置指南
-│   ├── smart-pain-point-framework.md
-│   ├── star-stories.md
-│   ├── multi-version-resume-workflow.md
-│   └── ...
-├── templates/
-│   └── coffee-meeting-anchor-card.md
-├── examples/
-│   └── full-preparation-case.md
-└── scripts/
-    └── generate_cover_letter_pdf.py
-
-skills/interview-simulation/
-└── SKILL.md
-
-skills/personality-receipt/
-└── SKILL.md
+Stage 0: 时间校准 → date确认
+Stage 1: Gmail+CDP扫描 → 发现新岗位
+Stage 2: JD提取 → 门槛审查 → 9维度评估
+Stage 3: 简历定制 → 生成定制版→ 用户确认→ 投递
+Stage 4: 追踪表更新 → 投后追踪
+Stage 5: 汇总报告 → 决策清单
 ```
+
+### 面试全链路准备
+
+```
+公司深度调研（多Agent并行调研 + 5角色对抗验证）
+  → SMART痛点逆向工程（从JD反推公司痛点×你的经验）
+  → 多AI交叉迭代（至少2轮独立AI对照验证）
+  → PPT设计大纲 → ppt-master自动生成面试PPT
+  → 多轮面试模拟（interview-simulation）
+  → 修正锚点卡 + 画句号清单
+```
+
+其中ppt-master支持自动提取公司官网品牌色、双版本交付（暖色+降级白）、演讲稿自动生成。
+
+---
 
 ## 方法论亮点
 
-- **STAR 反馈框架**：S(结构)/T(真实感)/A(直击核心)/R(可落地)，四维评分卡
-- **七轮递进模型**：从摸底到边界认知，还原面试官心理变化路径
-- **SMART 痛点逆向工程**：从 JD 反推公司真实痛点，用方案证明"这份工作需要你"
-- **笔记本法**/人话起手式/数字触发框架/问1答1：现场可用的沟通工具箱
+**SMART痛点逆向工程** — 从JD反推公司痛点，用你的经历证明能解决。
+**STORM 5角色对抗分析** — 学者/历史学家/实践者/经济学家/怀疑者，5视角3组对抗→观点对撞→输出修正清单。覆盖文档审计、面试叙事验证、公司调研结论交叉验证。
+**双视角决策法** — 实践者视角（落地执行）+ 经济学家视角（资源配置），双视角交叉验证。
+**9维度评估** — 核心三维（行业+职能+技能）满9分，综合20分，量化匹配度。
+**七轮递进模拟** — 面试官心理变化路径：从"考你"到"跟你一起想"。
+**渠道杠杆原则** — 内推权重≥匹配度分数，评估时综合考虑。
+**调研→PPT→模拟全链路** — deep-research多Agent调研 + STORM 5角色验证 → SMART痛点 → ppt-master生成PPT → interview-simulation多轮模拟，一站式前置准备。
 
-## 许可证
+---
+
+## License
 
 MIT
